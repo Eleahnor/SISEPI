@@ -12,7 +12,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sisepi.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+
+#base de datos
 class Caso(db.Model):
+    #def de tabla de casos
     __tablename__ = 'casos'
     id = db.Column(db.Integer, primary_key=True)
     edad = db.Column(db.Integer)
@@ -20,7 +23,7 @@ class Caso(db.Model):
     municipio = db.Column(db.String(50))  # Simple: texto en lugar de ID
     tipo = db.Column(db.String(20))  # Confirmado, Sospechoso, Descartado
     estado = db.Column(db.String(20))  # Activo, Recuperado, Fallecido
-    fecha_diagnostico = db.Column(db.Date, default=date.today)
+    diag_date = db.Column(db.Date, default=date.today)
     
     def to_dict(self):
         return {
@@ -30,16 +33,15 @@ class Caso(db.Model):
             'municipio': self.municipio,
             'tipo': self.tipo,
             'estado': self.estado,
-            'fecha_diagnostico': self.fecha_diagnostico.isoformat() if self.fecha_diagnostico else None
+            'diag_date': self.diag_date.isoformat() if self.diag_date else None
         }
 
-# ========== DATOS INICIALES ==========
+
 MUNICIPIOS_BCS = ['La Paz', 'Los Cabos', 'Comondú', 'Mulegé', 'Loreto']
 
 # Crear base de datos
 with app.app_context():
     db.create_all()
-    # Agregar datos de ejemplo si está vacío
     if Caso.query.count() == 0:
         ejemplos = [
             Caso(edad=45, sexo='M', municipio='La Paz', tipo='Confirmado', estado='Activo'),
@@ -51,12 +53,16 @@ with app.app_context():
         db.session.add_all(ejemplos)
         db.session.commit()
 
-# ========== ENDPOINTS DE LA API (Microservicios simplificados) ==========
 
-# Servicio 1: CRUD de Casos
+
+
+
+# endpoints para la API
+
+# s1 - CRUD
 @app.route('/api/casos', methods=['GET'])
 def get_casos():
-    """Obtener todos los casos o filtrar"""
+    #obtiene casos o filtra
     municipio = request.args.get('municipio')
     tipo = request.args.get('tipo')
     
@@ -71,10 +77,9 @@ def get_casos():
 
 @app.route('/api/casos', methods=['POST'])
 def create_caso():
-    """Crear nuevo caso"""
+    #crear caso
     data = request.json
     
-    # Validar municipio
     if data['municipio'] not in MUNICIPIOS_BCS:
         return jsonify({'error': 'Municipio no válido'}), 400
     
@@ -91,7 +96,7 @@ def create_caso():
 
 @app.route('/api/casos/<int:id>', methods=['PUT'])
 def update_caso(id):
-    """Actualizar caso existente"""
+    #modificar
     caso = Caso.query.get_or_404(id)
     data = request.json
     
@@ -99,7 +104,11 @@ def update_caso(id):
     if 'sexo' in data: caso.sexo = data['sexo']
     if 'municipio' in data: caso.municipio = data['municipio']
     if 'tipo' in data: caso.tipo = data['tipo']
-    if 'estado' in data: caso.estado = data['estado']
+    
+    if 'estado' in data: 
+        if caso.estado == 'Fallecido':
+            return jsonify({'error': 'El estado fallecido no se puede cambiar'}), 400
+        caso.estado = data['estado']
     
     db.session.commit()
     return jsonify(caso.to_dict())
@@ -112,15 +121,15 @@ def delete_caso(id):
     db.session.commit()
     return jsonify({'message': 'Caso eliminado'}), 200
 
-# Servicio 2: Geografía (municipios de BCS)
-@app.route('/api/municipios', methods=['GET'])
-def get_municipios():
-    """Listar los 5 municipios de BCS"""
-    return jsonify(MUNICIPIOS_BCS)
+# s2 - municipios
+# @app.route('/api/municipios', methods=['GET'])
+# def get_municipios():
+#     """Listar los 5 municipios de BCS"""
+#     return jsonify(MUNICIPIOS_BCS)
 
 @app.route('/api/municipios/<nombre>/estadisticas', methods=['GET'])
 def get_municipio_stats(nombre):
-    """Estadísticas por municipio"""
+    #estadisticas por municipio
     if nombre not in MUNICIPIOS_BCS:
         return jsonify({'error': 'Municipio no encontrado'}), 404
     
@@ -132,7 +141,6 @@ def get_municipio_stats(nombre):
         'activos': sum(1 for c in casos if c.estado == 'Activo'),
         'recuperados': sum(1 for c in casos if c.estado == 'Recuperado')
     })
-
 
 
 @app.route('/api/estadisticas', methods=['GET'])
@@ -164,7 +172,7 @@ def get_tendencia():
         }
     return jsonify(stats)
 
-# Ruta principal para servir la PWA
+# ruta principal para servir la PWA
 @app.route('/')
 def index():
     return render_template('index.html')
