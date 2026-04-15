@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>SISEPI BCS - Sistema Epidemiológico</title>
     <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#2E7D32">
+    <meta name="theme-color" content="#ffe28c">
     <style>
         * {
             margin: 0;
@@ -27,7 +27,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #2E7D32, #1B5E20);
+            background: linear-gradient(135deg, #ffc556, #b97b48);
             color: white;
             padding: 20px;
             border-radius: 10px;
@@ -49,7 +49,7 @@
         }
 
         .card h3 {
-            color: #2E7D32;
+            color: #ffc556;
             margin-bottom: 15px;
         }
 
@@ -57,14 +57,15 @@
         form select,
         form button {
             width: 100%;
-            padding: 10px;
+            padding: 15px;
             margin: 8px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
+            font-weight: bold;
         }
 
         form button {
-            background: #2E7D32;
+            background: #ffc556;
             color: white;
             border: none;
             cursor: pointer;
@@ -85,11 +86,11 @@
         .estadistica {
             font-size: 24px;
             font-weight: bold;
-            color: #2E7D32;
+            color: #ffc556;
         }
 
         button.eliminar {
-            background: #f44336;
+            background: #bb4e26;
             color: white;
             border: none;
             padding: 5px 10px;
@@ -116,17 +117,22 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏥 SISEPI BCS</h1>
-            <p>Sistema Epidemiológico de Baja California Sur</p>
-            <small>📍 5 Municipios: La Paz, Los Cabos, Comondú, Mulegé, Loreto</small>
+            <h1>🏥 SISEPI 🌊 BCS 🌵</h1>
+            <p>Sistema de Vigilancia Epidemiológico</p>
+            <small>🐚 La Paz - Los Cabos - Comondú - Mulegé - Loreto</small>
         </div>
 
         <div class="grid">
-            <!-- Formulario para agregar caso -->
+            <!-- formulario para agregar caso -->
             <div class="card">
                 <h3>➕ Registrar Nuevo Caso</h3>
                 <form id="casoForm">
                     <input type="number" id="edad" placeholder="Edad" required>
+
+                    <!-- 
+                    <input type="text" id="nombre" placeholder="Ap. Paterno Ap.Materno Nombre" required>
+                    
+                    -->
                     <select id="sexo" required>
                         <option value="">Sexo</option>
                         <option value="M">Masculino</option>
@@ -150,6 +156,7 @@
                         <option value="Recuperado">Recuperado</option>
                         <option value="Fallecido">Fallecido</option>
                     </select>
+
                     <button type="submit">Registrar Caso</button>
                 </form>
             </div>

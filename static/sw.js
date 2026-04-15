@@ -1,4 +1,4 @@
-// static/sw.js
+// 
 const CACHE_NAME = 'sisepi-v1';
 const urlsToCache = [
     '/',
