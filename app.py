@@ -14,45 +14,54 @@ db = SQLAlchemy(app)
 
 
 #base de datos
+# app.py - Actualizar el modelo Caso
 class Caso(db.Model):
-    #def de tabla de casos
     __tablename__ = 'casos'
     id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100))  
     edad = db.Column(db.Integer)
     sexo = db.Column(db.String(10))
-    municipio = db.Column(db.String(50))  # Simple: texto en lugar de ID
-    tipo = db.Column(db.String(20))  # Confirmado, Sospechoso, Descartado
-    estado = db.Column(db.String(20))  # Activo, Recuperado, Fallecido
+    municipio = db.Column(db.String(50))
+    enfermedad = db.Column(db.String(50))  
+    tipo = db.Column(db.String(20))  
+    estado = db.Column(db.String(20))  
     diag_date = db.Column(db.Date, default=date.today)
     
     def to_dict(self):
         return {
             'id': self.id,
+            'nombre': self.nombre,  # Nuevo
             'edad': self.edad,
             'sexo': self.sexo,
             'municipio': self.municipio,
+            'enfermedad': self.enfermedad,  # Nuevo
             'tipo': self.tipo,
             'estado': self.estado,
             'diag_date': self.diag_date.isoformat() if self.diag_date else None
         }
 
-
-MUNICIPIOS_BCS = ['La Paz', 'Los Cabos', 'Comondú', 'Mulegé', 'Loreto']
-
-# Crear base de datos
 with app.app_context():
     db.create_all()
     if Caso.query.count() == 0:
         ejemplos = [
-            Caso(edad=45, sexo='M', municipio='La Paz', tipo='Confirmado', estado='Activo'),
-            Caso(edad=32, sexo='F', municipio='Los Cabos', tipo='Sospechoso', estado='Activo'),
-            Caso(edad=58, sexo='M', municipio='Comondú', tipo='Confirmado', estado='Recuperado'),
-            Caso(edad=27, sexo='F', municipio='La Paz', tipo='Descartado', estado='Recuperado'),
-            Caso(edad=63, sexo='M', municipio='Mulegé', tipo='Confirmado', estado='Fallecido'),
+            Caso(nombre='Juan Pérez', edad=45, sexo='M', municipio='La Paz', 
+                 enfermedad='Dengue', tipo='Confirmado', estado='Activo'),
+            Caso(nombre='María López', edad=32, sexo='F', municipio='Los Cabos', 
+                 enfermedad='COVID-19', tipo='Sospechoso', estado='Activo'),
+            Caso(nombre='Carlos Ruiz', edad=58, sexo='M', municipio='Comondú', 
+                 enfermedad='Zika', tipo='Confirmado', estado='Recuperado'),
+            Caso(nombre='Ana García', edad=27, sexo='F', municipio='La Paz', 
+                 enfermedad='Dengue', tipo='Descartado', estado='Recuperado'),
+            Caso(nombre='Roberto Soto', edad=63, sexo='M', municipio='Mulegé', 
+                 enfermedad='COVID-19', tipo='Confirmado', estado='Fallecido'),
+            Caso(nombre='Laura Méndez', edad=41, sexo='F', municipio='Loreto', 
+                 enfermedad='Chikungunya', tipo='Confirmado', estado='Activo'),
         ]
         db.session.add_all(ejemplos)
         db.session.commit()
 
+
+MUNICIPIOS_BCS = ['La Paz', 'Los Cabos', 'Comondú', 'Mulegé', 'Loreto']
 
 
 
@@ -171,6 +180,7 @@ def get_tendencia():
             'confirmados': sum(1 for c in casos if c.tipo == 'Confirmado')
         }
     return jsonify(stats)
+
 
 # ruta principal para servir la PWA
 @app.route('/')

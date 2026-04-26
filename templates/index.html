@@ -124,20 +124,21 @@
 
         <div class="grid">
             <!-- formulario para agregar caso -->
+            <!-- templates/index.html - Actualizar el formulario -->
             <div class="card">
                 <h3>➕ Registrar Nuevo Caso</h3>
                 <form id="casoForm">
+                    <!-- Nuevo campo: Nombre completo -->
+                    <input type="text" id="nombre" placeholder="Nombre completo" required>
+
                     <input type="number" id="edad" placeholder="Edad" required>
 
-                    <!-- 
-                    <input type="text" id="nombre" placeholder="Ap. Paterno Ap.Materno Nombre" required>
-                    
-                    -->
                     <select id="sexo" required>
                         <option value="">Sexo</option>
                         <option value="M">Masculino</option>
                         <option value="F">Femenino</option>
                     </select>
+
                     <select id="municipio" required>
                         <option value="">Municipio</option>
                         <option value="La Paz">La Paz</option>
@@ -146,11 +147,24 @@
                         <option value="Mulegé">Mulegé</option>
                         <option value="Loreto">Loreto</option>
                     </select>
+
+                    <!-- Nuevo campo: Enfermedad -->
+                    <select id="enfermedad" required>
+                        <option value="">Enfermedad</option>
+                        <option value="Dengue">Dengue</option>
+                        <option value="COVID-19">COVID-19</option>
+                        <option value="Zika">Zika</option>
+                        <option value="Chikungunya">Chikungunya</option>
+                        <option value="Influenza">Influenza</option>
+                        <option value="Otra">Otra</option>
+                    </select>
+
                     <select id="tipo">
                         <option value="Sospechoso">Sospechoso</option>
                         <option value="Confirmado">Confirmado</option>
                         <option value="Descartado">Descartado</option>
                     </select>
+
                     <select id="estado">
                         <option value="Activo">Activo</option>
                         <option value="Recuperado">Recuperado</option>
@@ -178,9 +192,11 @@
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Nombre</th>
                             <th>Edad</th>
                             <th>Sexo</th>
                             <th>Municipio</th>
+                            <th>Enfermedad</th>
                             <th>Tipo</th>
                             <th>Estado</th>
                             <th>Acciones</th>
@@ -213,9 +229,11 @@
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${caso.id}</td>
+                    <td>${caso.nombre || 'N/A'}</td>  <!-- Nuevo -->
                     <td>${caso.edad}</td>
                     <td>${caso.sexo}</td>
                     <td>${caso.municipio}</td>
+                    <td>${caso.enfermedad || 'N/A'}</td>  <!-- Nuevo -->
                     <td>${caso.tipo}</td>
                     <td>${caso.estado}</td>
                     <td><button class="eliminar" onclick="deleteCaso(${caso.id})">Eliminar</button></td>
@@ -242,29 +260,36 @@
             `;
         }
 
-        // Crear nuevo caso
+
         document.getElementById('casoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const nuevoCaso = {
+                nombre: document.getElementById('nombre').value,  // Nuevo
                 edad: parseInt(document.getElementById('edad').value),
                 sexo: document.getElementById('sexo').value,
                 municipio: document.getElementById('municipio').value,
+                enfermedad: document.getElementById('enfermedad').value,  // Nuevo
                 tipo: document.getElementById('tipo').value,
                 estado: document.getElementById('estado').value
             };
 
-            await fetch(`${API_URL}/casos`, {
+            const response = await fetch(`${API_URL}/casos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(nuevoCaso)
             });
 
-            // Resetear formulario y recargar
-            document.getElementById('casoForm').reset();
-            loadData();
+            if (response.ok) {
+                document.getElementById('casoForm').reset();
+                loadData();
+                // Mostrar mensaje de éxito
+                alert('✅ yap');
+            } else {
+                const error = await response.json();
+                alert('❌ nop: ' + error.error);
+            }
         });
-
         // Eliminar caso
         async function deleteCaso(id) {
             if (confirm('¿Eliminar este caso?')) {
