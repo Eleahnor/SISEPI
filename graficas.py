@@ -260,19 +260,16 @@ HTML_TEMPLATE = '''
 '''
 
 def get_db_connection():
-    """Conectar a la base de datos SQLite"""
     conn = sqlite3.connect('instance/sisepi.db')
     conn.row_factory = sqlite3.Row
     return conn
 
 @app.route('/')
 def dashboard():
-    """Servir el dashboard de gráficas"""
     return render_template_string(HTML_TEMPLATE)
 
 @app.route('/api/datos-enfermedades', methods=['GET'])
 def get_datos_enfermedades():
-    """Endpoint que devuelve datos para las gráficas"""
     conn = get_db_connection()
     
     # Consultar casos agrupados por enfermedad
