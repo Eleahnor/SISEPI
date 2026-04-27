@@ -123,12 +123,10 @@
         </div>
 
         <div class="grid">
-            <!-- formulario para agregar caso -->
-            <!-- templates/index.html - Actualizar el formulario -->
+            <!-- templates/index.html  -->
             <div class="card">
                 <h3>➕ Registrar Nuevo Caso</h3>
                 <form id="casoForm">
-                    <!-- Nuevo campo: Nombre completo -->
                     <input type="text" id="nombre" placeholder="Nombre completo" required>
 
                     <input type="number" id="edad" placeholder="Edad" required>
@@ -148,7 +146,6 @@
                         <option value="Loreto">Loreto</option>
                     </select>
 
-                    <!-- Nuevo campo: Enfermedad -->
                     <select id="enfermedad" required>
                         <option value="">Enfermedad</option>
                         <option value="Dengue">Dengue</option>
@@ -175,7 +172,6 @@
                 </form>
             </div>
 
-            <!-- Estadísticas rápidas -->
             <div class="card">
                 <h3>📊 Estadísticas BCS</h3>
                 <div id="stats">
@@ -184,9 +180,13 @@
             </div>
         </div>
 
-        <!-- Lista de casos -->
+
+
+
+
+        <!-- lista -->
         <div class="card">
-            <h3>📋 Casos Registrados</h3>
+            <h3>Casos Registrados</h3>
             <div style="overflow-x: auto;">
                 <table id="casosTable">
                     <thead>
@@ -211,29 +211,27 @@
     <script>
         const API_URL = 'http://localhost:5000/api';
 
-        // Cargar datos al iniciar
-        async function loadData() {
+        async function loadData() { //pruebas
             await loadCasos();
             await loadEstadisticas();
         }
 
-        // Cargar todos los casos
         async function loadCasos() {
-            const response = await fetch(`${API_URL}/casos`);
+            const response = await fetch(`${API_URL}/casos`); //url donde esta la api
             const casos = await response.json();
 
-            const tbody = document.getElementById('casosList');
+            const tbody = document.getElementById('casosList'); //listar
             tbody.innerHTML = '';
 
             casos.forEach(caso => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${caso.id}</td>
-                    <td>${caso.nombre || 'N/A'}</td>  <!-- Nuevo -->
+                    <td>${caso.nombre || 'N/A'}</td>  
                     <td>${caso.edad}</td>
                     <td>${caso.sexo}</td>
                     <td>${caso.municipio}</td>
-                    <td>${caso.enfermedad || 'N/A'}</td>  <!-- Nuevo -->
+                    <td>${caso.enfermedad || 'N/A'}</td>  
                     <td>${caso.tipo}</td>
                     <td>${caso.estado}</td>
                     <td><button class="eliminar" onclick="deleteCaso(${caso.id})">Eliminar</button></td>
@@ -241,7 +239,6 @@
             });
         }
 
-        // Cargar estadísticas
         async function loadEstadisticas() {
             const response = await fetch(`${API_URL}/estadisticas`);
             const stats = await response.json();
@@ -251,12 +248,12 @@
                 <div class="estadistica">${stats.total_casos || 0}</div>
                 <p>Total de casos</p>
                 <hr>
-                <p>📊 Promedio edad: ${stats.promedio_edad || 0} años</p>
+                <p>Promedio edad: ${stats.promedio_edad || 0} años</p>
                 <h4>Por municipio:</h4>
                 ${stats.por_municipio ? Object.entries(stats.por_municipio).map(([m, c]) => `<p>${m}: ${c} casos</p>`).join('') : '<p>Sin datos</p>'}
                 <h4>Por tipo:</h4>
-                <p>✅ Confirmados: ${stats.por_tipo?.Confirmado || 0}</p>
-                <p>⚠️ Sospechosos: ${stats.por_tipo?.Sospechoso || 0}</p>
+                <p>Confirmados: ${stats.por_tipo?.Confirmado || 0}</p>
+                <p>Sospechosos: ${stats.por_tipo?.Sospechoso || 0}</p>
             `;
         }
 
@@ -283,14 +280,14 @@
             if (response.ok) {
                 document.getElementById('casoForm').reset();
                 loadData();
-                // Mostrar mensaje de éxito
-                alert('✅ yap');
+                alert('✅ ya quedó :D');
             } else {
                 const error = await response.json();
-                alert('❌ nop: ' + error.error);
+                alert(error.error);
             }
         });
-        // Eliminar caso
+
+
         async function deleteCaso(id) {
             if (confirm('¿Eliminar este caso?')) {
                 await fetch(`${API_URL}/casos/${id}`, { method: 'DELETE' });
@@ -298,14 +295,11 @@
             }
         }
 
-        // Iniciar
         loadData();
-
-        // Recargar cada 30 segundos
-        setInterval(loadData, 30000);
+        setInterval(loadData, 30000);//30 s
     </script>
 
-    <!-- Registrar Service Worker para PWA -->
+
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/static/sw.js')
