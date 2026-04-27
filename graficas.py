@@ -1,4 +1,3 @@
-# graficas_service.py - Microservicio para gráficas epidemiológicas
 from flask import Flask, render_template_string, jsonify
 from flask_cors import CORS
 import sqlite3
@@ -21,8 +20,6 @@ def dashboard():
 @app.route('/api/datos-enfermedades', methods=['GET'])
 def get_datos_enfermedades():
     conn = get_db_connection()
-    
-    # Consultar casos agrupados por enfermedad
     cursor = conn.execute('''
         SELECT enfermedad, COUNT(*) as total 
         FROM casos 
@@ -48,7 +45,10 @@ def get_datos_enfermedades():
     total = sum(cantidades)
     porcentajes = [round((c/total)*100, 1) for c in cantidades]
     
-    # Encontrar enfermedad más común
+
+
+
+    
     idx_max = cantidades.index(max(cantidades))
     
     return jsonify({

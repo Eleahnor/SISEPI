@@ -38,6 +38,7 @@ class Caso(db.Model):
             'diag_date': self.diag_date.isoformat() if self.diag_date else None
         }
 
+# grax depy
 with app.app_context():
     db.create_all()
     if Caso.query.count() == 0:
@@ -122,7 +123,6 @@ def update_caso(id):
 
 @app.route('/api/casos/<int:id>', methods=['DELETE'])
 def delete_caso(id):
-    """Eliminar caso"""
     caso = Caso.query.get_or_404(id)
     db.session.delete(caso)
     db.session.commit()
@@ -131,12 +131,10 @@ def delete_caso(id):
 # s2 - municipios
 # @app.route('/api/municipios', methods=['GET'])
 # def get_municipios():
-#     """Listar los 5 municipios de BCS"""
 #     return jsonify(MUNICIPIOS_BCS)
 
 @app.route('/api/municipios/<nombre>/estadisticas', methods=['GET'])
 def get_municipio_stats(nombre):
-    #estadisticas por municipio
     if nombre not in MUNICIPIOS_BCS:
         return jsonify({'error': 'Municipio no encontrado'}), 404
     
