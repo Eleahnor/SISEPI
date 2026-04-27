@@ -28,11 +28,11 @@ class Caso(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'nombre': self.nombre,  # Nuevo
+            'nombre': self.nombre,  
             'edad': self.edad,
             'sexo': self.sexo,
             'municipio': self.municipio,
-            'enfermedad': self.enfermedad,  # Nuevo
+            'enfermedad': self.enfermedad, 
             'tipo': self.tipo,
             'estado': self.estado,
             'diag_date': self.diag_date.isoformat() if self.diag_date else None
