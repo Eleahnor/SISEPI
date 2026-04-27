@@ -1,7 +1,7 @@
 {
     "short_name": "SISEPI",
     "name": "SISEPI BCS - Sistema Epidemiológico",
-    "description": "Monitoreo de casos en Baja California Sur",
+    "description": "Monitoreo de casos en Baja California Sur, México",
     "start_url": "/",
     "display": "standalone",
     "theme_color": "#2E7D32",

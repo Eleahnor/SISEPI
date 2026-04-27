@@ -6,15 +6,13 @@ from collections import Counter
 import json
 
 app = Flask(__name__)
-CORS(app)  #PWA
+CORS(app)  
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sisepi.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-
-#base de datos
-# app.py - Actualizar el modelo Caso
+# mod case
 class Caso(db.Model):
     __tablename__ = 'casos'
     id = db.Column(db.Integer, primary_key=True)
