@@ -83,28 +83,36 @@ def get_casos():
     casos = query.all()
     return jsonify([c.to_dict() for c in casos])
 
+@app.route('/api/casos/<int:id>', methods=['GET'])
+def get_caso(id):
+    caso = Caso.query.get_or_404(id)
+    return jsonify(caso.to_dict())
+
 @app.route('/api/casos', methods=['POST'])
 def create_caso():
-    #crear caso
     data = request.json
     
     if data['municipio'] not in MUNICIPIOS_BCS:
         return jsonify({'error': 'Municipio no válido'}), 400
+    if not data.get('enfermedad'):
+        return jsonify({'error': 'La enfermedad es requerida'}), 400
     
     nuevo_caso = Caso(
         edad=data['edad'],
         sexo=data['sexo'],
         municipio=data['municipio'],
         tipo=data.get('tipo', 'Sospechoso'),
-        estado=data.get('estado', 'Activo')
+        estado=data.get('estado', 'Activo'),
+        nombre=data.get('nombre', 'Anónimo'),
+        enfermedad=data.get('enfermedad', 'Desconocida')
     )
+    #save
     db.session.add(nuevo_caso)
-    db.session.commit()
+    db.session.commit() 
     return jsonify(nuevo_caso.to_dict()), 201
 
 @app.route('/api/casos/<int:id>', methods=['PUT'])
 def update_caso(id):
-    #modificar
     caso = Caso.query.get_or_404(id)
     data = request.json
     
@@ -117,6 +125,9 @@ def update_caso(id):
         if caso.estado == 'Fallecido':
             return jsonify({'error': 'El estado fallecido no se puede cambiar'}), 400
         caso.estado = data['estado']
+    
+    if 'enfermedad' in data: caso.enfermedad = data['enfermedad']
+    if 'nombre' in data: caso.nombre = data['nombre']
     
     db.session.commit()
     return jsonify(caso.to_dict())
@@ -147,6 +158,10 @@ def get_municipio_stats(nombre):
         'recuperados': sum(1 for c in casos if c.estado == 'Recuperado')
     })
 
+
+@app.route('/editar')
+def editar():
+    return render_template('editar.html')
 
 @app.route('/api/estadisticas', methods=['GET'])
 def get_estadisticas():
