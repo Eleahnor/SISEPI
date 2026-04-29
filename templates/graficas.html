@@ -1,0 +1,411 @@
+<!-- templates/graficas.html -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISEPI - Dashboard de Enfermedades</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#2E7D32">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ffc556, #b97b48);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 28px;
+        }
+
+        .header p {
+            color: white;
+            margin-top: 5px;
+        }
+
+        .btn-volver {
+
+            background: #ffc556;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .btn-volver:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-actualizar {
+            background: #5dc7a4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 16px;
+            margin-left: 10px;
+            transition: transform 0.2s;
+        }
+
+        .btn-actualizar:hover {
+            background: #4daa8b;
+            transform: translateY(-2px);
+        }
+
+        .graficas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .grafica-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .grafica-card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-left: 4px solid #2E7D32;
+            padding-left: 10px;
+        }
+
+        .grafica-container {
+            width: 100%;
+            height: 450px;
+        }
+
+        .stats-resumen {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .stats-resumen h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-left: 4px solid #4daa8b;
+            padding-left: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4daa8b;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #721c24;
+            background: #f8d7da;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .graficas-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .grafica-container {
+                height: 350px;
+            }
+
+            .btn-volver,
+            .btn-actualizar {
+                display: block;
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            .btn-actualizar {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 SISEPI - Dashboard Epidemiológico</h1>
+            <p>Análisis de enfermedades en Baja California Sur</p>
+            <div>
+                <button class="btn-volver" onclick="window.location.href='/'">← Volver al inicio</button>
+                <button class="btn-actualizar" onclick="actualizarGraficas()">🔄 Actualizar Datos</button>
+            </div>
+        </div>
+
+        <div class="graficas-grid">
+            <!-- Gráfica de Pastel -->
+            <div class="grafica-card">
+                <h2>🥧 Distribución de Enfermedades</h2>
+                <div id="graficaPastel" class="grafica-container">
+                    <div class="loading">Cargando gráfica...</div>
+                </div>
+            </div>
+
+            <!-- Gráfica de Barras -->
+            <div class="grafica-card">
+                <h2>📊 Casos por Enfermedad</h2>
+                <div id="graficaBarras" class="grafica-container">
+                    <div class="loading">Cargando gráfica...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-resumen">
+            <h2>📈 Resumen Epidemiológico</h2>
+            <div id="resumenStats" class="stats-grid">
+                <div class="loading">Cargando estadísticas...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL fija del API
+        const API_URL = 'http://localhost:5000/api';
+
+        // Función para mostrar errores
+        function mostrarError(mensaje) {
+            document.getElementById('graficaPastel').innerHTML = `<div class="error">❌ ${mensaje}</div>`;
+            document.getElementById('graficaBarras').innerHTML = `<div class="error">❌ ${mensaje}</div>`;
+            document.getElementById('resumenStats').innerHTML = `<div class="error">❌ ${mensaje}</div>`;
+        }
+
+        async function cargarDatos() {
+            try {
+                console.log('Cargando datos desde:', `${API_URL}/datos-enfermedades`);
+                const response = await fetch(`${API_URL}/datos-enfermedades`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Datos recibidos:', data);
+                return data;
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                mostrarError(`Error al cargar datos: ${error.message}. ¿El servidor está corriendo en http://localhost:5000?`);
+                return null;
+            }
+        }
+
+        async function actualizarGraficas() {
+            // Mostrar loading
+            document.getElementById('graficaPastel').innerHTML = '<div class="loading">🔄 Cargando gráfica...</div>';
+            document.getElementById('graficaBarras').innerHTML = '<div class="loading">🔄 Cargando gráfica...</div>';
+            document.getElementById('resumenStats').innerHTML = '<div class="loading">🔄 Cargando estadísticas...</div>';
+
+            const datos = await cargarDatos();
+
+            if (!datos) {
+                return;
+            }
+
+            if (datos.total_casos === 0 || datos.enfermedades[0] === 'Sin datos') {
+                mostrarError('⚠️ No hay datos de enfermedades registrados. Registra algunos casos primero.');
+                return;
+            }
+
+            try {
+                // Gráfica de Pastel
+                const pieTrace = {
+                    values: datos.porcentajes,
+                    labels: datos.enfermedades,
+                    type: 'pie',
+                    marker: {
+                        colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FF9999', '#99FF99'],
+                        line: { color: 'white', width: 2 }
+                    },
+                    textinfo: 'label+percent',
+                    textposition: 'auto',
+                    hole: 0.3,
+                    hoverinfo: 'label+percent+value',
+                    hovertemplate: '<b>%{label}</b><br>Casos: %{value}<br>Porcentaje: %{percent}<extra></extra>'
+                };
+
+                const pieLayout = {
+                    title: {
+                        text: 'Distribución de Casos por Enfermedad',
+                        font: { size: 16, family: 'Arial', color: '#333' }
+                    },
+                    showlegend: true,
+                    legend: {
+                        orientation: 'h',
+                        y: -0.1,
+                        font: { size: 12 }
+                    },
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)'
+                };
+
+                Plotly.newPlot('graficaPastel', [pieTrace], pieLayout, { responsive: true });
+
+                // Gráfica de Barras
+                const barTrace = {
+                    x: datos.enfermedades,
+                    y: datos.cantidades,
+                    type: 'bar',
+                    marker: {
+                        color: '#4ECDC4',
+                        line: { color: '#2E7D32', width: 1.5 }
+                    },
+                    text: datos.cantidades,
+                    textposition: 'auto',
+                    textfont: { size: 12, color: '#333' },
+                    hoverinfo: 'x+y',
+                    hovertemplate: '<b>%{x}</b><br>Casos: %{y}<extra></extra>'
+                };
+
+                const barLayout = {
+                    title: {
+                        text: 'Número de Casos por Enfermedad',
+                        font: { size: 16, family: 'Arial', color: '#333' }
+                    },
+                    xaxis: {
+                        title: 'Enfermedad',
+                        tickangle: -45,
+                        titlefont: { size: 12 }
+                    },
+                    yaxis: {
+                        title: 'Número de Casos',
+                        gridcolor: '#e0e0e0',
+                        titlefont: { size: 12 }
+                    },
+                    bargap: 0.3,
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)'
+                };
+
+                Plotly.newPlot('graficaBarras', [barTrace], barLayout, { responsive: true });
+
+                // Actualizar resumen
+                const enfermedadMasComun = datos.enfermedad_mas_comun;
+                const maxPorcentaje = Math.max(...datos.porcentajes);
+
+                document.getElementById('resumenStats').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${datos.total_casos}</div>
+                        <div class="stat-label">Total de Casos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${datos.enfermedades.length}</div>
+                        <div class="stat-label">Enfermedades Registradas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${enfermedadMasComun?.nombre || 'N/A'}</div>
+                        <div class="stat-label">Enfermedad más común</div>
+                        <small>${enfermedadMasComun?.casos || 0} casos (${enfermedadMasComun?.porcentaje || 0}%)</small>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${maxPorcentaje}%</div>
+                        <div class="stat-label">Mayor porcentaje</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error creando gráficas:', error);
+                mostrarError('Error al crear las gráficas: ' + error.message);
+            }
+        }
+
+        // Verificar que el servidor está disponible
+        async function verificarServidor() {
+            try {
+                const response = await fetch(`${API_URL}/estadisticas`);
+                if (response.ok) {
+                    console.log('Servidor conectado');
+                    actualizarGraficas();
+                } else {
+                    mostrarError('Reinicia el servidor.');
+                }
+            } catch (error) {
+                console.error('Servidor no disponible:', error);
+                mostrarError(' No se puede conectar al servidor. Asegúrate de que "python app.py" está corriendo en http://localhost:5000');
+            }
+        }
+
+        // Iniciar
+        verificarServidor();
+
+        // Actualizar cada 30 segundos
+        setInterval(verificarServidor, 30000);
+    </script>
+</body>
+
+</html>

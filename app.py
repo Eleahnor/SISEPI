@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sisepi.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# mod case
+
 class Caso(db.Model):
     __tablename__ = 'casos'
     id = db.Column(db.Integer, primary_key=True)
@@ -38,7 +38,7 @@ class Caso(db.Model):
             'diag_date': self.diag_date.isoformat() if self.diag_date else None
         }
 
-# grax depy
+# ========== DATOS DE EJEMPLO ==========
 with app.app_context():
     db.create_all()
     if Caso.query.count() == 0:
@@ -59,18 +59,12 @@ with app.app_context():
         db.session.add_all(ejemplos)
         db.session.commit()
 
-
 MUNICIPIOS_BCS = ['La Paz', 'Los Cabos', 'Comondú', 'Mulegé', 'Loreto']
 
+# ========== ENDPOINTS PARA CRUD ==========
 
-
-
-# endpoints para la API
-
-# s1 - CRUD
 @app.route('/api/casos', methods=['GET'])
 def get_casos():
-    #obtiene casos o filtra
     municipio = request.args.get('municipio')
     tipo = request.args.get('tipo')
     
@@ -98,15 +92,15 @@ def create_caso():
         return jsonify({'error': 'La enfermedad es requerida'}), 400
     
     nuevo_caso = Caso(
+        nombre=data.get('nombre', 'Anónimo'),
         edad=data['edad'],
         sexo=data['sexo'],
         municipio=data['municipio'],
+        enfermedad=data.get('enfermedad', 'Desconocida'),
         tipo=data.get('tipo', 'Sospechoso'),
-        estado=data.get('estado', 'Activo'),
-        nombre=data.get('nombre', 'Anónimo'),
-        enfermedad=data.get('enfermedad', 'Desconocida')
+        estado=data.get('estado', 'Activo')
     )
-    #save
+    
     db.session.add(nuevo_caso)
     db.session.commit() 
     return jsonify(nuevo_caso.to_dict()), 201
@@ -116,18 +110,16 @@ def update_caso(id):
     caso = Caso.query.get_or_404(id)
     data = request.json
     
+    if 'nombre' in data: caso.nombre = data['nombre']
     if 'edad' in data: caso.edad = data['edad']
     if 'sexo' in data: caso.sexo = data['sexo']
     if 'municipio' in data: caso.municipio = data['municipio']
+    if 'enfermedad' in data: caso.enfermedad = data['enfermedad']
     if 'tipo' in data: caso.tipo = data['tipo']
-    
     if 'estado' in data: 
         if caso.estado == 'Fallecido':
             return jsonify({'error': 'El estado fallecido no se puede cambiar'}), 400
         caso.estado = data['estado']
-    
-    if 'enfermedad' in data: caso.enfermedad = data['enfermedad']
-    if 'nombre' in data: caso.nombre = data['nombre']
     
     db.session.commit()
     return jsonify(caso.to_dict())
@@ -139,10 +131,7 @@ def delete_caso(id):
     db.session.commit()
     return jsonify({'message': 'Caso eliminado'}), 200
 
-# s2 - municipios
-# @app.route('/api/municipios', methods=['GET'])
-# def get_municipios():
-#     return jsonify(MUNICIPIOS_BCS)
+# ========== ENDPOINTS PARA ESTADÍSTICAS ==========
 
 @app.route('/api/municipios/<nombre>/estadisticas', methods=['GET'])
 def get_municipio_stats(nombre):
@@ -157,11 +146,6 @@ def get_municipio_stats(nombre):
         'activos': sum(1 for c in casos if c.estado == 'Activo'),
         'recuperados': sum(1 for c in casos if c.estado == 'Recuperado')
     })
-
-
-@app.route('/editar')
-def editar():
-    return render_template('editar.html')
 
 @app.route('/api/estadisticas', methods=['GET'])
 def get_estadisticas():
@@ -178,6 +162,7 @@ def get_estadisticas():
         'por_municipio': dict(Counter(c.municipio for c in todos)),
         'por_tipo': dict(Counter(c.tipo for c in todos)),
         'por_estado': dict(Counter(c.estado for c in todos)),
+        'por_enfermedad': dict(Counter(c.enfermedad for c in todos if c.enfermedad)),
         'municipios': MUNICIPIOS_BCS
     })
 
@@ -192,11 +177,60 @@ def get_tendencia():
         }
     return jsonify(stats)
 
+# ========== ENDPOINT PARA GRÁFICAS ==========
 
-# ruta principal para servir la PWA
+@app.route('/api/datos-enfermedades', methods=['GET'])
+def get_datos_enfermedades():
+    """Endpoint que devuelve datos para las gráficas"""
+    from sqlalchemy import func
+    
+    resultados = db.session.query(
+        Caso.enfermedad, 
+        func.count(Caso.id).label('total')
+    ).filter(Caso.enfermedad != '', Caso.enfermedad.isnot(None)).group_by(Caso.enfermedad).order_by(func.count(Caso.id).desc()).all()
+    
+    if not resultados:
+        return jsonify({
+            'enfermedades': ['Sin datos'],
+            'cantidades': [0],
+            'porcentajes': [100],
+            'total_casos': 0,
+            'enfermedad_mas_comun': None
+        })
+    
+    enfermedades = [r[0] for r in resultados]
+    cantidades = [r[1] for r in resultados]
+    total = sum(cantidades)
+    porcentajes = [round((c/total)*100, 1) for c in cantidades]
+    
+    idx_max = cantidades.index(max(cantidades))
+    
+    return jsonify({
+        'enfermedades': enfermedades,
+        'cantidades': cantidades,
+        'porcentajes': porcentajes,
+        'total_casos': total,
+        'enfermedad_mas_comun': {
+            'nombre': enfermedades[idx_max],
+            'casos': cantidades[idx_max],
+            'porcentaje': porcentajes[idx_max]
+        }
+    })
+
+
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/editar')
+def editar():
+    return render_template('editar.html')
+
+@app.route('/graficas')
+def graficas():
+    return render_template('graficas.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
