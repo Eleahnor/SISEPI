@@ -98,6 +98,20 @@
             cursor: pointer;
         }
 
+        button.editar {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        button.editar:hover {
+            background: #0b7dda;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -216,25 +230,29 @@
             await loadEstadisticas();
         }
 
+
         async function loadCasos() {
-            const response = await fetch(`${API_URL}/casos`); //url donde esta la api
+            const response = await fetch(`${API_URL}/casos`);
             const casos = await response.json();
 
-            const tbody = document.getElementById('casosList'); //listar
+            const tbody = document.getElementById('casosList');
             tbody.innerHTML = '';
 
             casos.forEach(caso => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${caso.id}</td>
-                    <td>${caso.nombre || 'N/A'}</td>  
+                    <td>${caso.nombre || 'N/A'}</td>
                     <td>${caso.edad}</td>
                     <td>${caso.sexo}</td>
                     <td>${caso.municipio}</td>
-                    <td>${caso.enfermedad || 'N/A'}</td>  
+                    <td>${caso.enfermedad || 'N/A'}</td>
                     <td>${caso.tipo}</td>
                     <td>${caso.estado}</td>
-                    <td><button class="eliminar" onclick="deleteCaso(${caso.id})">Eliminar</button></td>
+                    <td>
+                        <button class="editar" onclick="editarCaso(${caso.id})" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:3px; margin-right:5px; cursor:pointer;">✏️ Editar</button>
+                        <button class="eliminar" onclick="deleteCaso(${caso.id})">Eliminar</button>
+                    </td>
                 `;
             });
         }
@@ -293,6 +311,11 @@
                 await fetch(`${API_URL}/casos/${id}`, { method: 'DELETE' });
                 loadData();
             }
+        }
+
+
+        function editarCaso(id) {
+            window.location.href = `/editar?id=${id}`;
         }
 
         loadData();

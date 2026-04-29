@@ -1,4 +1,3 @@
-<!-- templates/editar.html -->
 <!DOCTYPE html>
 <html lang="es">
 
@@ -131,8 +130,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>✏️ SISEPI - Editar Caso</h1>
-            <p>Modifique los datos del caso epidemiológico</p>
+            <h1>✏️ Editar Caso Epidemiológico</h1>
+            <p>Modifique los datos del caso</p>
         </div>
 
         <div class="card">
@@ -213,27 +212,25 @@
         const urlParams = new URLSearchParams(window.location.search);
         const casoId = urlParams.get('id');
 
-        let casoActual = null;
-
         // Cargar los datos del caso
         async function cargarCaso() {
             try {
                 const response = await fetch(`${API_URL}/casos/${casoId}`);
                 if (!response.ok) throw new Error('Caso no encontrado');
 
-                casoActual = await response.json();
+                const caso = await response.json();
 
                 // Llenar el formulario con los datos actuales
-                document.getElementById('nombre').value = casoActual.nombre || '';
-                document.getElementById('edad').value = casoActual.edad;
-                document.getElementById('sexo').value = casoActual.sexo;
-                document.getElementById('municipio').value = casoActual.municipio;
-                document.getElementById('enfermedad').value = casoActual.enfermedad || '';
-                document.getElementById('tipo').value = casoActual.tipo;
-                document.getElementById('estado').value = casoActual.estado;
+                document.getElementById('nombre').value = caso.nombre || '';
+                document.getElementById('edad').value = caso.edad;
+                document.getElementById('sexo').value = caso.sexo;
+                document.getElementById('municipio').value = caso.municipio;
+                document.getElementById('enfermedad').value = caso.enfermedad || '';
+                document.getElementById('tipo').value = caso.tipo;
+                document.getElementById('estado').value = caso.estado;
 
             } catch (error) {
-                mostrarAlerta('error', 'Error al cargar los datos del caso: ' + error.message);
+                mostrarAlerta('error', 'Error al cargar los datos del caso');
             }
         }
 
@@ -259,11 +256,6 @@
 
             if (datosActualizados.edad < 0 || datosActualizados.edad > 120) {
                 mostrarAlerta('error', 'La edad debe estar entre 0 y 120 años');
-                return;
-            }
-
-            if (!datosActualizados.enfermedad) {
-                mostrarAlerta('error', 'Debe seleccionar una enfermedad');
                 return;
             }
 
