@@ -38,7 +38,7 @@ class Caso(db.Model):
             'diag_date': self.diag_date.isoformat() if self.diag_date else None
         }
 
-# ========== DATOS DE EJEMPLO ==========
+
 with app.app_context():
     db.create_all()
     if Caso.query.count() == 0:
@@ -61,7 +61,11 @@ with app.app_context():
 
 MUNICIPIOS_BCS = ['La Paz', 'Los Cabos', 'Comondú', 'Mulegé', 'Loreto']
 
-# ========== ENDPOINTS PARA CRUD ==========
+
+
+
+
+
 
 @app.route('/api/casos', methods=['GET'])
 def get_casos():
@@ -74,7 +78,7 @@ def get_casos():
     if tipo:
         query = query.filter_by(tipo=tipo)
     
-    casos = query.all()
+    casos = query.all() #
     return jsonify([c.to_dict() for c in casos])
 
 @app.route('/api/casos/<int:id>', methods=['GET'])
@@ -131,7 +135,6 @@ def delete_caso(id):
     db.session.commit()
     return jsonify({'message': 'Caso eliminado'}), 200
 
-# ========== ENDPOINTS PARA ESTADÍSTICAS ==========
 
 @app.route('/api/municipios/<nombre>/estadisticas', methods=['GET'])
 def get_municipio_stats(nombre):
@@ -177,7 +180,23 @@ def get_tendencia():
         }
     return jsonify(stats)
 
-# ========== ENDPOINT PARA GRÁFICAS ==========
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# graf
 
 @app.route('/api/datos-enfermedades', methods=['GET'])
 def get_datos_enfermedades():
