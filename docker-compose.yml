@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: sisepi-postgres
+    environment:
+      POSTGRES_DB: sisepi
+      POSTGRES_USER: sisepi
+      POSTGRES_PASSWORD: sisepi123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sisepi-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U sisepi" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: sisepi-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - sisepi-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  casos-service:
+    build: ./casos-service
+    container_name: sisepi-casos
+    environment:
+      DB_HOST: postgres
+      DB_USER: sisepi
+      DB_PASSWORD: sisepi123
+      DB_NAME: sisepi
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sisepi-network
+    restart: unless-stopped
+
+  estadisticas-service:
+    build: ./estadisticas-service
+    container_name: sisepi-estadisticas
+    environment:
+      DB_HOST: postgres
+      DB_USER: sisepi
+      DB_PASSWORD: sisepi123
+      DB_NAME: sisepi
+      REDIS_HOST: redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - sisepi-network
+    restart: unless-stopped
+
+  graficas-service:
+    build: ./graficas-service
+    container_name: sisepi-graficas
+    environment:
+      DB_HOST: postgres
+      DB_USER: sisepi
+      DB_PASSWORD: sisepi123
+      DB_NAME: sisepi
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sisepi-network
+    restart: unless-stopped
+
+  gateway:
+    build: ./gateway
+    container_name: sisepi-gateway
+    ports:
+      - "8080:5000"
+    environment:
+      CASOS_SERVICE_URL: http://casos-service:5001
+      ESTADISTICAS_SERVICE_URL: http://estadisticas-service:5002
+      GRAFICAS_SERVICE_URL: http://graficas-service:5003
+    depends_on:
+      - casos-service
+      - estadisticas-service
+      - graficas-service
+    networks:
+      - sisepi-network
+    restart: unless-stopped
+
+networks:
+  sisepi-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
