@@ -1,12 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISEPI - Editar Caso</title>
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#ffe28c">
+    <title>SISEPI - Gestionar Casos</title>
+    <meta charset="utf-8">
     <style>
         * {
             margin: 0;
@@ -15,231 +12,164 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
-        }
-
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
         }
 
         .header {
-            background: linear-gradient(135deg, #ffc556, #b97b48);
+            background: #1a73e8;
             color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .nav {
+            background: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .nav a {
+            color: #1a73e8;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .form-card,
+        .table-card {
+            background: white;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
         }
 
-
-        .header h1 {
-            color: white;
-        }
-
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h2 {
-            color: #333;
-            margin-bottom: 20px;
-            border-left: 4px solid #ffc556;
-            padding-left: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 500;
-        }
-
         input,
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
+        select,
+        button {
+            padding: 10px;
+            margin: 5px;
         }
 
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #ffc556;
+        input {
+            width: calc(100% - 20px);
+            margin: 10px 0;
         }
 
         button {
-            width: 100%;
-            padding: 12px;
-            background: #ffc556;
-            color: #333;
+            background: #1a73e8;
+            color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
         }
 
         button:hover {
-            background: #e0a800;
+            background: #1557b0;
         }
 
-        .btn-volver {
-            background: #6c757d;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #1a73e8;
             color: white;
         }
 
-        .btn-volver:hover {
-            background: #5a6268;
+        .edit-btn {
+            background: #ff9800;
         }
 
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            display: block;
-        }
-
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            display: block;
+        .delete-btn {
+            background: #f44336;
         }
     </style>
 </head>
 
 <body>
+    <div class="header">
+        <h1>SISEPI - Gestión de Casos</h1>
+    </div>
+    <div class="nav"><a href="/">Dashboard</a><a href="/editar">Gestionar</a><a href="/graficas">Gráficas</a></div>
     <div class="container">
-        <div class="header">
-            <h1>✏️ Editar Caso Epidemiológico</h1>
-            <p>Modifique los datos del caso</p>
+        <div class="form-card">
+            <h2>Registrar Nuevo Caso</h2>
+            <input type="text" id="nombre" placeholder="Nombre"><br>
+            <input type="number" id="edad" placeholder="Edad"><br>
+            <select id="sexo">
+                <option>M</option>
+                <option>F</option>
+            </select>
+            <select id="municipio">
+                <option>La Paz</option>
+                <option>Los Cabos</option>
+                <option>Comondú</option>
+                <option>Mulegé</option>
+                <option>Loreto</option>
+            </select>
+            <input type="text" id="enfermedad" placeholder="Enfermedad"><br>
+            <select id="tipo">
+                <option>Sospechoso</option>
+                <option>Confirmado</option>
+                <option>Descartado</option>
+            </select>
+            <select id="estado">
+                <option>Activo</option>
+                <option>Recuperado</option>
+                <option>Fallecido</option>
+            </select>
+            <button onclick="crearCaso()">Registrar Caso</button>
         </div>
-
-        <div class="card">
-            <h2>Formulario de Edición</h2>
-
-            <div id="alert" class="alert"></div>
-
-            <form id="editarForm">
-                <div class="form-group">
-                    <label>Nombre completo *</label>
-                    <input type="text" id="nombre" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Edad *</label>
-                    <input type="number" id="edad" required min="0" max="120">
-                </div>
-
-                <div class="form-group">
-                    <label>Sexo *</label>
-                    <select id="sexo" required>
-                        <option value="M">Masculino</option>
-                        <option value="F">Femenino</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Municipio *</label>
-                    <select id="municipio" required>
-                        <option value="La Paz">La Paz</option>
-                        <option value="Los Cabos">Los Cabos</option>
-                        <option value="Comondú">Comondú</option>
-                        <option value="Mulegé">Mulegé</option>
-                        <option value="Loreto">Loreto</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Enfermedad *</label>
-                    <select id="enfermedad" required>
-                        <option value="Dengue">Dengue</option>
-                        <option value="COVID-19">COVID-19</option>
-                        <option value="Zika">Zika</option>
-                        <option value="Chikungunya">Chikungunya</option>
-                        <option value="Influenza">Influenza</option>
-                        <option value="Otra">Otra</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Tipo *</label>
-                    <select id="tipo" required>
-                        <option value="Sospechoso">Sospechoso</option>
-                        <option value="Confirmado">Confirmado</option>
-                        <option value="Descartado">Descartado</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Estado *</label>
-                    <select id="estado" required>
-                        <option value="Activo">Activo</option>
-                        <option value="Recuperado">Recuperado</option>
-                        <option value="Fallecido">Fallecido</option>
-                    </select>
-                </div>
-
-                <button type="submit">💾 Guardar Cambios</button>
-                <button type="button" class="btn-volver" onclick="window.location.href='/'">← Volver al inicio</button>
-            </form>
+        <div class="table-card">
+            <h2>Lista de Casos</h2>
+            <table id="casos-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Edad</th>
+                        <th>Municipio</th>
+                        <th>Enfermedad</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="casos-body"></tbody>
+            </table>
         </div>
     </div>
-
     <script>
-        const API_URL = 'http://localhost:5000/api';
-
-        // Obtener el ID del caso desde la URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const casoId = urlParams.get('id');
-
-        // Cargar los datos del caso
-        async function cargarCaso() {
-            try {
-                const response = await fetch(`${API_URL}/casos/${casoId}`);
-                if (!response.ok) throw new Error('Caso no encontrado');
-
-                const caso = await response.json();
-
-                // Llenar el formulario con los datos actuales
-                document.getElementById('nombre').value = caso.nombre || '';
-                document.getElementById('edad').value = caso.edad;
-                document.getElementById('sexo').value = caso.sexo;
-                document.getElementById('municipio').value = caso.municipio;
-                document.getElementById('enfermedad').value = caso.enfermedad || '';
-                document.getElementById('tipo').value = caso.tipo;
-                document.getElementById('estado').value = caso.estado;
-
-            } catch (error) {
-                mostrarAlerta('error', 'Error al cargar los datos del caso');
-            }
+        async function loadCasos() {
+            const res = await fetch('/api/casos');
+            const casos = await res.json();
+            document.getElementById('casos-body').innerHTML = casos.map(c => `
+                <tr>
+                    <td>${c.id}</td><td>${c.nombre}</td><td>${c.edad}</td>
+                    <td>${c.municipio}</td><td>${c.enfermedad}</td><td>${c.tipo}</td>
+                    <td>${c.estado}</td>
+                    <td><button class="edit-btn" onclick="editarCaso(${c.id})">Editar</button>
+                    <button class="delete-btn" onclick="eliminarCaso(${c.id})">Eliminar</button></td>
+                </tr>
+            `).join('');
         }
-
-        // Guardar cambios
-        document.getElementById('editarForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const datosActualizados = {
+        async function crearCaso() {
+            const data = {
                 nombre: document.getElementById('nombre').value,
                 edad: parseInt(document.getElementById('edad').value),
                 sexo: document.getElementById('sexo').value,
@@ -248,57 +178,19 @@
                 tipo: document.getElementById('tipo').value,
                 estado: document.getElementById('estado').value
             };
-
-            // Validaciones
-            if (!datosActualizados.nombre || datosActualizados.nombre.length < 2) {
-                mostrarAlerta('error', 'El nombre debe tener al menos 2 caracteres');
-                return;
-            }
-
-            if (datosActualizados.edad < 0 || datosActualizados.edad > 120) {
-                mostrarAlerta('error', 'La edad debe estar entre 0 y 120 años');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_URL}/casos/${casoId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(datosActualizados)
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    mostrarAlerta('success', '✅ Caso actualizado correctamente');
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 1500);
-                } else {
-                    mostrarAlerta('error', result.error || 'Error al actualizar');
-                }
-            } catch (error) {
-                mostrarAlerta('error', 'Error de conexión con el servidor');
-            }
-        });
-
-        function mostrarAlerta(tipo, mensaje) {
-            const alertDiv = document.getElementById('alert');
-            alertDiv.textContent = mensaje;
-            alertDiv.className = `alert ${tipo}`;
-            alertDiv.style.display = 'block';
-
-            setTimeout(() => {
-                alertDiv.style.display = 'none';
-            }, 4000);
+            await fetch('/api/casos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            loadCasos();
         }
-
-        // Cargar datos si hay ID
-        if (casoId) {
-            cargarCaso();
-        } else {
-            mostrarAlerta('error', 'No se especificó qué caso editar');
+        async function editarCaso(id) {
+            const nuevoEstado = prompt('Nuevo estado (Activo/Recuperado/Fallecido):');
+            if (nuevoEstado) await fetch(`/api/casos/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ estado: nuevoEstado }) });
+            loadCasos();
         }
+        async function eliminarCaso(id) {
+            if (confirm('¿Eliminar este caso?')) await fetch(`/api/casos/${id}`, { method: 'DELETE' });
+            loadCasos();
+        }
+        loadCasos();
     </script>
 </body>
 

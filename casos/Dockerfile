@@ -2,7 +2,6 @@ FROM python:3.9-slim
 
 WORKDIR /app
 COPY app.py .
-COPY templates/ ./templates/
-RUN pip install flask requests
+RUN pip install flask flask-cors
 
 CMD ["python", "app.py"]
